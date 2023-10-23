@@ -1,7 +1,9 @@
 package model;
 
 import exceptions.NotInStock;
+import exceptions.ScoreNotInRange;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.Map;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class Commodity {
     private String id;
     private String name;
@@ -33,9 +36,14 @@ public class Commodity {
         this.inStock += amount;
     }
 
-    public void addRate(String username, int score) {
-        userRate.put(username, score);
-        this.calcRating();
+    public void addRate(String username, int score) throws ScoreNotInRange {
+        if(score<0 || score>10) {
+            throw new ScoreNotInRange();
+        }
+        else {
+            userRate.put(username, score);
+            this.calcRating();
+        }
     }
 
     private void calcRating() {
