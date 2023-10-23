@@ -23,6 +23,10 @@ public class Commodity {
     private Map<String, Integer> userRate = new HashMap<>();
     private float initRate;
 
+    public Commodity(String id)
+    {
+        this.id = id;
+    }
     public void updateInStock(int amount) throws NotInStock {
         if ((this.inStock + amount) < 0)
             throw new NotInStock();
