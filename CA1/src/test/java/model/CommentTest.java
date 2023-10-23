@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CommentTest {
@@ -29,6 +30,17 @@ public class CommentTest {
     @Test
     public void testAddUserVote()
     {
+        comment.addUserVote("sina","like");
+        comment.addUserVote("ali","dislike");
+        comment.addUserVote("mamad","like");
+        comment.addUserVote("shirin","dislike");
 
+        int expectedLike = 2;
+        int expecctedDislike = 2;
+
+        assertAll("Multiple assertions",
+                () -> assertEquals(expectedLike,comment.getLike()),
+                () -> assertEquals(expecctedDislike,comment.getDislike())
+        );
     }
 }
