@@ -68,6 +68,8 @@ public class BuyListController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (AlreadyInBuyList e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (InStockZero e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -92,6 +94,8 @@ public class BuyListController {
             return new ResponseEntity<>("buy list purchased successfully!", HttpStatus.OK);
         } catch (InsufficientCredit | NotExistentUser | NotInStock e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (QuntityIsNegative e) {
+            throw new RuntimeException(e);
         }
     }
 

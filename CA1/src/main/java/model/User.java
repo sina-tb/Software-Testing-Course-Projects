@@ -1,8 +1,6 @@
 package model;
 
-import exceptions.CommodityIsNotInBuyList;
-import exceptions.InsufficientCredit;
-import exceptions.InvalidCreditRange;
+import exceptions.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -47,21 +45,29 @@ public class User {
         this.credit -= amount;
     }
 
-    public void addBuyItem(Commodity commodity) {
-        String id = commodity.getId();
-        if (this.buyList.containsKey(id)) {
-            int existingQuantity = this.buyList.get(id);
-            this.buyList.put(id, existingQuantity + 1);
-        } else
-            this.buyList.put(id, 1);
+    public void addBuyItem(Commodity commodity) throws InStockZero {
+        if (commodity.getInStock() == 0) {
+            throw new InStockZero();
+        } else {
+            String id = commodity.getId();
+            if (this.buyList.containsKey(id)) {
+                int existingQuantity = this.buyList.get(id);
+                this.buyList.put(id, existingQuantity + 1);
+            } else
+                this.buyList.put(id, 1);
+        }
     }
 
-    public void addPurchasedItem(String id, int quantity) {
-        if (this.purchasedList.containsKey(id)) {
-            int existingQuantity = this.purchasedList.get(id);
-            this.purchasedList.put(id, existingQuantity + quantity);
-        } else
-            this.purchasedList.put(id, quantity);
+    public void addPurchasedItem(String id, int quantity) throws QuntityIsNegative {
+        if (quantity < 0) {
+            throw new QuntityIsNegative();
+        } else {
+            if (this.purchasedList.containsKey(id)) {
+                int existingQuantity = this.purchasedList.get(id);
+                this.purchasedList.put(id, existingQuantity + quantity);
+            } else
+                this.purchasedList.put(id, quantity);
+        }
     }
 
     public void removeItemFromBuyList(Commodity commodity) throws CommodityIsNotInBuyList {

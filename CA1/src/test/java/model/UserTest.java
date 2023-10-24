@@ -1,16 +1,17 @@
 package model;
 
-import exceptions.CommodityIsNotInBuyList;
-import exceptions.InsufficientCredit;
-import exceptions.InvalidCreditRange;
+import exceptions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.internal.matchers.Null;
 
 
+import javax.lang.model.type.NullType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -18,18 +19,18 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserTest {
-
     private static User user;
     @BeforeEach
     public void setup()
     {
         user = new User();
     }
+
     @ParameterizedTest
-    @ValueSource ( floats = {120, 200, 2})
-    public void testAddCreditWithValidAmount(float amountToAdd) throws InvalidCreditRange
+    @CsvSource( {"100, 30", "120, 10", "2, 3"})
+    public void testAddCreditWithValidAmount(float amountToAdd, float initialCredit) throws InvalidCreditRange
     {
-        float initialCredit = user.getCredit();
+        user.setCredit(initialCredit);
         float expectedCredit = initialCredit + amountToAdd;
 
         user.addCredit(amountToAdd);
@@ -37,26 +38,27 @@ public class UserTest {
         assertEquals(expectedCredit, user.getCredit());
     }
     @ParameterizedTest
-    @ValueSource(floats = {-30})
+    @ValueSource(floats = {-30, -12})
     public void testAddCreditWithInvalidAmount(float invalidAmount) throws InvalidCreditRange
     {
         user.addCredit(invalidAmount);
     }
-    @Test
-    public void testWithdrawCreditWithValidAmount() throws InsufficientCredit
+    @ParameterizedTest
+    @CsvSource( {"100, 30", "120, 10", "30, 3"})
+    public void testWithdrawCreditWithValidAmount(float initialCredit, float amountToSubtract) throws InsufficientCredit
     {
-        float initialCredit = user.getCredit();
-        float amountToSubtract = user.getCredit() - 10;
+        user.setCredit(initialCredit);
         float expectedCredit = initialCredit - amountToSubtract;
 
         user.withdrawCredit(amountToSubtract);
 
         assertEquals(expectedCredit, user.getCredit());
     }
-    @Test
-    public void testWithdrawCreditWithInvalidAmount() throws InsufficientCredit
+    @ParameterizedTest
+    @CsvSource( {"20, 30", "10, 50", "30, 100"})
+    public void testWithdrawCreditWithInvalidAmount(float initialCredit, float invalidAmount) throws InsufficientCredit
     {
-        float invalidAmount = user.getCredit() + 1;
+        user.setCredit(initialCredit);
 
         user.withdrawCredit(invalidAmount);
     }
@@ -67,8 +69,8 @@ public class UserTest {
     }
     @ParameterizedTest
     @MethodSource("ProvidingCommodity")
-    public void testAddBuyItemWhenNotExistsInBuylist(Commodity commodity)
-    {
+    public void testAddBuyItemWhenNotExistsInBuylist(Commodity commodity) throws InStockZero {
+        commodity.setInStock(1);
         user.addBuyItem(commodity);
         Map<String, Integer> expectedBuyList = Map.of(commodity.getId(), 1);
 
@@ -76,13 +78,19 @@ public class UserTest {
     }
     @ParameterizedTest
     @MethodSource ("ProvidingCommodity")
-    public void testAddBuyItemWhenExistsInBuylist(Commodity commodity)
-    {
+    public void testAddBuyItemWhenExistsInBuylist(Commodity commodity) throws InStockZero {
+        commodity.setInStock(1);
         user.addBuyItem(commodity);
         user.addBuyItem(commodity);
 
         Map<String, Integer> expectedBuyList = Map.of(commodity.getId(), 2);
         assertEquals(expectedBuyList, user.getBuyList());
+    }
+
+    @Test
+    public void testAddBuyItemWhenInStockIsZero(Commodity commodity) throws InStockZero {
+        commodity.setInStock(0);
+        user.addBuyItem(commodity);
     }
 
     static Stream<Arguments> IdAndQuantityForNotExistedPurchasedList() {
@@ -92,8 +100,7 @@ public class UserTest {
     }
     @ParameterizedTest
     @MethodSource("IdAndQuantityForNotExistedPurchasedList")
-    void testAddPurchasedItemWhenNotExistsInPurchasedList(String id, int quantity,Map <String, Integer> expectedPurchasedList)
-    {
+    void testAddPurchasedItemWhenNotExistsInPurchasedList(String id, int quantity,Map <String, Integer> expectedPurchasedList) throws QuntityIsNegative {
 
         user.addPurchasedItem(id, quantity);
         assertEquals(expectedPurchasedList, user.getPurchasedList());
@@ -106,12 +113,17 @@ public class UserTest {
     }
     @ParameterizedTest
     @MethodSource("IdAndQuantityForExistedPurchasedList")
-    void testAddPurchasedItemWhenExistsInPurchasedList(String id, int initialQuantity,int additionalQuantity,Map <String, Integer> expectedPurchasedList)
-    {
+    void testAddPurchasedItemWhenExistsInPurchasedList(String id, int initialQuantity,int additionalQuantity,Map <String, Integer> expectedPurchasedList) throws QuntityIsNegative {
         user.addPurchasedItem(id, initialQuantity);
         user.addPurchasedItem(id, additionalQuantity);
 
         assertEquals(expectedPurchasedList, user.getPurchasedList());
+    }
+    @ParameterizedTest
+    @CsvSource( {"123, -23", "123, -50"})
+    public void testAddPurchasedItemWithInvalidQuantity(String id,int invalidQuantity) throws QuntityIsNegative
+    {
+        user.addPurchasedItem(id, invalidQuantity);
     }
     @ParameterizedTest
     @MethodSource("ProvidingCommodity")
@@ -121,7 +133,8 @@ public class UserTest {
     }
     @ParameterizedTest
     @MethodSource("ProvidingCommodity")
-    void testRemoveItemFromBuyListWhenIdExistsAndRemovesItemFromBuyList(Commodity commodity) throws CommodityIsNotInBuyList {
+    void testRemoveItemFromBuyListWhenIdExistsAndRemovesItemFromBuyList(Commodity commodity) throws CommodityIsNotInBuyList, InStockZero {
+        commodity.setInStock(1);
         user.addBuyItem(commodity);
 
         user.removeItemFromBuyList(commodity);
@@ -132,7 +145,8 @@ public class UserTest {
     }
     @ParameterizedTest
     @MethodSource("ProvidingCommodity")
-    void testRemoveItemFromBuyListWhenItSubtractBuyList(Commodity commodity) throws CommodityIsNotInBuyList {
+    void testRemoveItemFromBuyListWhenItSubtractBuyList(Commodity commodity) throws CommodityIsNotInBuyList, InStockZero {
+        commodity.setInStock(1);
         user.addBuyItem(commodity);
         user.addBuyItem(commodity);
 

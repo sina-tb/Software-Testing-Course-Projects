@@ -24,6 +24,7 @@ public class Errors {
     public static final String NOT_EXISTENT_USER = "User does not exist.";
     public static final String INCORRECT_PASSWORD = "Incorrect password.";
     public static final String USERNAME_ALREADY_TAKEN = "The username is already taken.";
-
     public static final String SCORE_IS_NOT_IN_RANGE = "The score is no in range.";
+    public static final String QUANTITY_IS_NEGATIVE = "Quantity is negative.";
+    public static final String IN_STOCK_IS_ZERO = "In Stock is zero.";
 }
