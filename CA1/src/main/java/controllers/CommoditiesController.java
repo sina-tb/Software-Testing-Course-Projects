@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class CommoditiesController {
         } catch (NumberFormatException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (ScoreNotInRange e) {
-            throw new RuntimeException(e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -63,11 +64,14 @@ public class CommoditiesController {
         User user = null;
         try {
             user = baloot.getUserById(username);
-        } catch (NotExistentUser ignored) {
-        }
+            Comment comment = new Comment(commentId, user.getEmail(), user.getUsername(), Integer.parseInt(id), commentText);
+            baloot.addComment(comment);
 
-        Comment comment = new Comment(commentId, user.getEmail(), user.getUsername(), Integer.parseInt(id), commentText);
-        baloot.addComment(comment);
+        } catch (NotExistentUser e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (NumberFormatException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
 
         return new ResponseEntity<>("comment added successfully!", HttpStatus.OK);
     }
@@ -100,7 +104,7 @@ public class CommoditiesController {
             Commodity commodity = baloot.getCommodityById(id);
             ArrayList<Commodity> suggestedCommodities = baloot.suggestSimilarCommodities(commodity);
             return new ResponseEntity<>(suggestedCommodities, HttpStatus.OK);
-        } catch (NotExistentCommodity ignored) {
+        } catch (NotExistentCommodity e) {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
         }
     }
