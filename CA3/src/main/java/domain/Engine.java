@@ -6,9 +6,7 @@ public class Engine {
 
     ArrayList<Order> orderHistory;
 
-    public Engine() {
-        orderHistory = new ArrayList<>();
-    }
+    public Engine() { orderHistory = new ArrayList<>();}
 
     int getAverageOrderQuantityByCustomer(int customer) {
         var sum = 0;
