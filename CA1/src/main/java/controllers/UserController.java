@@ -38,8 +38,7 @@ public class UserController {
         } catch (NotExistentUser e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (NumberFormatException e) {
-            return new ResponseEntity<>("Please enter a valid number for the credit amount."
-                    , HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Format of number is wrong", HttpStatus.BAD_REQUEST);
         }
 
 
