@@ -49,7 +49,7 @@ public class CommoditiesController {
         } catch (NotExistentCommodity e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (NumberFormatException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Format of number is wrong", HttpStatus.BAD_REQUEST);
         } catch (ScoreNotInRange e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -70,7 +70,7 @@ public class CommoditiesController {
         } catch (NotExistentUser e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (NumberFormatException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Format of number is wrong", HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity<>("comment added successfully!", HttpStatus.OK);
@@ -108,5 +108,4 @@ public class CommoditiesController {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NOT_FOUND);
         }
     }
-
 }
