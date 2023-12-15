@@ -1,5 +1,6 @@
 package model;
 
+import exceptions.InStockZero;
 import exceptions.NotInStock;
 import exceptions.ScoreNotInRange;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,8 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CommodityTest {
 
@@ -26,9 +26,9 @@ public class CommodityTest {
 
     @ParameterizedTest
     @CsvSource({"20, -30", "10, -50"})
-    public void testUpdateInStockWhenIsNotInStock(int inStock, int amount) throws NotInStock {
+    public void testUpdateInStockWhenIsNotInStock(int inStock, int amount){
         commodity.setInStock(inStock);
-        commodity.updateInStock(amount);
+        assertThrows(NotInStock.class, () -> commodity.updateInStock(amount));
     }
 
     @ParameterizedTest
@@ -90,7 +90,7 @@ public class CommodityTest {
     @ParameterizedTest
     @MethodSource("providingUserRate")
     public void testAddRateScoreOutOfRange(String name, int score) throws ScoreNotInRange {
-        commodity.addRate(name, score);
+        assertThrows(ScoreNotInRange.class, () -> commodity.addRate(name, score));
     }
     @ParameterizedTest
     @CsvSource({"sina, 5"})

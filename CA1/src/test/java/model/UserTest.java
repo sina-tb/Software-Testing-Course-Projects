@@ -37,9 +37,9 @@ public class UserTest {
     }
     @ParameterizedTest
     @ValueSource(floats = {-30, -12})
-    public void testAddCreditWithInvalidAmount(float invalidAmount) throws InvalidCreditRange
+    public void testAddCreditWithInvalidAmount(float invalidAmount)
     {
-        user.addCredit(invalidAmount);
+        assertThrows(InvalidCreditRange.class, () -> user.addCredit(invalidAmount));
     }
     @ParameterizedTest
     @CsvSource( {"100, 30", "120, 10", "30, 3"})
@@ -57,8 +57,7 @@ public class UserTest {
     public void testWithdrawCreditWithInvalidAmount(float initialCredit, float invalidAmount) throws InsufficientCredit
     {
         user.setCredit(initialCredit);
-
-        user.withdrawCredit(invalidAmount);
+        assertThrows(InsufficientCredit.class, () -> user.withdrawCredit(invalidAmount));
     }
     static Stream<Arguments> ProvidingCommodity() {
         return Stream.of(
@@ -85,10 +84,11 @@ public class UserTest {
         assertEquals(expectedBuyList, user.getBuyList());
     }
 
-    @Test
-    public void testAddBuyItemWhenInStockIsZero(Commodity commodity) throws InStockZero {
+    @ParameterizedTest
+    @MethodSource ("ProvidingCommodity")
+    public void testAddBuyItemWhenInStockIsZero(Commodity commodity) {
         commodity.setInStock(0);
-        user.addBuyItem(commodity);
+        assertThrows(InStockZero.class, () -> user.addBuyItem(commodity));
     }
 
     static Stream<Arguments> IdAndQuantityForNotExistedPurchasedList() {
@@ -119,15 +119,15 @@ public class UserTest {
     }
     @ParameterizedTest
     @CsvSource( {"123, -23", "123, -50"})
-    public void testAddPurchasedItemWithInvalidQuantity(String id,int invalidQuantity) throws QuntityIsNegative
+    public void testAddPurchasedItemWithInvalidQuantity(String id,int invalidQuantity)
     {
-        user.addPurchasedItem(id, invalidQuantity);
+        assertThrows(QuntityIsNegative.class, () -> user.addPurchasedItem(id, invalidQuantity));
     }
     @ParameterizedTest
     @MethodSource("ProvidingCommodity")
-    void testRemoveItemFromBuyListWhenIdNotExistsInBuyList(Commodity commodity)  throws CommodityIsNotInBuyList
+    void testRemoveItemFromBuyListWhenIdNotExistsInBuyList(Commodity commodity)
     {
-        user.removeItemFromBuyList(commodity);
+        assertThrows(CommodityIsNotInBuyList.class, () -> user.removeItemFromBuyList(commodity));
     }
     @ParameterizedTest
     @MethodSource("ProvidingCommodity")
