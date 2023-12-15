@@ -13,16 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: code Checkout
       - uses: actions/checkout@v2
 
-      - name: JDK Set up
       - uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
           java-version: '19'
 
-      - name: Run tests
       - run: |
           cd CA1
           mvn -B package --file pom.xml
